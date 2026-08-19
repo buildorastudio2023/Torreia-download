@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="appDocumentTitle">Gestion</title>
+<!-- Intégration d'ExcelJS pour la mise en page Excel et de Chart.js pour la génération du diagramme -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--text:#17202a;--muted:#68727d;--primary:#6f4e37;--primary2:#8b6245;--danger:#d64545;--ok:#16835b;--border:#e3e7eb;--shadow:0 8px 24px rgba(20,30,40,.07)}
+*{box-sizing:border-box}
+html, body { max-width: 100%; overflow-x: hidden; height: 100%; margin: 0; }
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select{font:inherit}button{border:0;cursor:pointer}
+.app{display:grid;grid-template-columns:230px 1fr;height:100vh;max-width:100vw;overflow:hidden;}
+.sidebar{background:#211a16;color:#fff;padding:18px 14px;height:100vh;overflow-y:auto;}
+.logo{font-size:21px;font-weight:800;padding:8px 10px 22px}.logo span{color:#d8b28e}
+.nav button{width:100%;padding:12px 13px;margin:4px 0;border-radius:10px;background:transparent;color:#ddd;text-align:left}
+.nav button:hover,.nav button.active{background:#3a2c24;color:#fff}
+.main{padding:20px;max-width:1600px;width:100%;margin:auto;min-width:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.top{position:relative;display:flex;justify-content:space-between;align-items:center;min-height:64px;box-sizing:border-box;margin-bottom:18px;padding:0 0 10px 0;border-bottom:1px solid #bbb2a1;flex-shrink:0;}
+h1{margin:0;font-size:25px}.subtitle{color:var(--muted);font-size:13px;margin-top:3px}
+.actions{display:flex;gap:8px;flex-wrap:nowrap;align-items:center}.btn{padding:10px 14px;border-radius:99px;background:#fff;border:1px solid var(--border);font-weight:700}.btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}.btn.danger{background:#fff0f0;color:var(--danger);border-color:#ffd2d2}.btn.ok{background:#eaf8f2;color:var(--ok);border-color:#cbeee0}
+.page{display:none;flex:1;min-height:0;}.page.active{display:flex;flex-direction:column;}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:17px;box-shadow:var(--shadow)}
+.kpi-label{color:var(--muted);font-size:12px}.kpi{font-size:27px;font-weight:800;margin-top:7px}.kpi small{font-size:13px;color:var(--muted);font-weight:600}
+.grid2{display:grid;grid-template-columns:1.35fr .65fr;gap:16px;overflow-y:auto;}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.panel{background:#fff;border:1px solid var(--border);border-radius:14px;padding:17px;box-shadow:var(--shadow)}.panel h2{font-size:17px;margin:0 0 14px}
+.table-wrap{overflow-x:auto;overflow-y:auto;max-width:100%;max-height:calc(100vh - 250px);}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:11px 9px;border-bottom:1px solid var(--border);text-align:left;font-size:13px;white-space:nowrap}.table th{color:var(--muted);font-weight:700;background:#fafbfc}
+.badge{display:inline-flex;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:800}.badge.ok{background:#e8f7f0;color:#14764f}.badge.warn{background:#fff6dd;color:#986c00}.badge.danger{background:#ffeded;color:#b82e2e}
+.form{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}.field label{font-size:12px;color:var(--muted);font-weight:700}.field input,.field select{padding:10px;border:1px solid var(--border);border-radius:8px;outline:none;background:#fff}.field input:focus,.field select:focus{border-color:var(--primary)}
+.field-checkbox{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text)}
+.field-checkbox input[type="checkbox"]{width:18px;height:18px;cursor:pointer;accent-color:var(--gold)}
+.pos{display:grid;grid-template-columns:1fr 370px;gap:16px;max-width:100%;flex:1;min-height:0;}.pos > div:first-child { min-width: 0; display:flex; flex-direction:column; min-height:0; }
+.products{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;overflow-y:auto;padding-right:4px;flex:1;min-height:0;}.product{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;text-align:left;min-height:105px}.product:hover{border-color:var(--primary);transform:translateY(-1px)}.product .emoji{font-size:25px}.product strong{display:block;margin-top:6px}.product small{color:var(--muted)}
+.search{width:100%;padding:12px;border:1px solid var(--border);border-radius:99px;margin-bottom:11px}
+.cart{display:flex;flex-direction:column;height:100%;max-height:100%;overflow:hidden;}.cart-list{flex:1;overflow-y:auto;min-height:0;}.cart-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}.qty{display:flex;align-items:center;gap:5px}.qty button{width:25px;height:25px;border-radius:6px;background:#eee}.totals{margin-top:auto;padding-top:10px;}.total-line{display:flex;justify-content:space-between;padding:6px 0}.grand{font-size:20px;font-weight:900;border-top:1px solid var(--border);padding-top:10px}
+.quick-pay{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:12px}.quick-pay button{padding:10px 5px;border-radius:8px;background:#f0f2f4;font-weight:700;font-size:11px}.quick-pay button.selected{background:var(--primary);color:#fff}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:13px;max-width:100%;flex-shrink:0;}.toolbar input,.toolbar select{padding:10px;border:1px solid var(--border);border-radius:8px;background:#fff}
+.empty{text-align:center;color:var(--muted);padding:30px}.danger-text{color:var(--danger);font-weight:800}.stock-low{background:#fffaf0}
+.toast{position:fixed;right:20px;bottom:20px;background:#211a16;color:#fff;padding:13px 17px;border-radius:10px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s;z-index:99}.toast.show{opacity:1;transform:none}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:10000;padding:20px}.modal.open{display:flex}.modal-box{background:#fff;border-radius:15px;width:min(650px,100%);padding:20px;max-height:90vh;overflow:auto}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+
+/* Esthétique Casablanca / cinéma noir & blanc */
+:root{
+  --bg:#e8e3d7;
+  --card:#f8f5ec;
+  --text:#171717;
+  --muted:#68645c;
+  --primary:#171717;
+  --primary2:#33312d;
+  --danger:#8e2d28;
+  --ok:#3d5748;
+  --border:#c9c1b2;
+  --gold:#aa8951;
+  --shadow:0 12px 30px rgba(20,20,20,.13);
+}
+body{
+  background:
+    radial-gradient(circle at 20% 10%,rgba(255,255,255,.65),transparent 30%),
+    linear-gradient(135deg,#eeeae0,#ddd7ca);
+  color:var(--text);
+}
+.sidebar{
+  background:#111;
+  color:#f4f0e6;
+  border-right:3px solid var(--gold);
+  box-shadow:8px 0 25px rgba(0,0,0,.16);
+}
+.logo{
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:20px;
+  letter-spacing:2px;
+  text-align:center;
+  text-transform:uppercase;
+  padding-top:12px;
+}
+.logo span{color:#c5a267}
+.nav button{color:#d9d5cc;border-radius:4px}
+.nav button:hover,.nav button.active{
+  background:#2b2926;
+  color:#fff;
+  border-left:3px solid var(--gold);
+}
+.main{background:transparent}
+h1,h2{
+  font-family:Georgia,'Times New Roman',serif;
+  letter-spacing:.2px;
+}
+.subtitle{
+  font-family:Georgia,serif;
+  font-style:italic;
+}
+.card,.panel{
+  background:rgba(248,245,236,.96);
+  border:1px solid #c9c1b2;
+  border-radius:6px;
+  box-shadow:var(--shadow);
+}
+.btn{
+  border-radius:4px;
+  background:#f8f5ec;
+  border-color:#bfb6a7;
+}
+.btn.primary{
+  background:#171717;
+  border-color:#171717;
+  color:#fff;
+  letter-spacing:.3px;
+}
+.btn.primary:hover{background:#34312c}
+.btn.danger{
+  background:#8e2d28;
+  color:#fff;
+  border-color:#6e201c;
+}
+.btn.danger:hover{
+  background:#aa3731;
+}
+.product{
+  background:#f8f5ec;
+  border:1px solid #c7bfae;
+  border-radius:5px;
+}
+.product:hover{
+  border-color:var(--gold);
+  box-shadow:0 7px 18px rgba(30,25,20,.14);
+}
+.table th{
+  background:#e5dfd3;
+  color:#3c3934;
+}
+.table td{border-bottom-color:#d5cdbf}
+.badge.ok{
+  background:#e1e8e2;
+  color:#314b3d;
+}
+.field input,.field select,.toolbar input,.toolbar select,.search{
+  background:#fbf8f0;
+  border-color:#c8bfaf;
+  border-radius:4px;
+}
+.quick-pay button{border-radius:4px}
+.quick-pay button.selected{
+  background:#171717;
+}
+.grand{
+  font-family:Georgia,serif;
+}
+
+.top-right{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:12px;
+  margin-left:auto;
+}
+
+/* SYSTÈME D'ONGLETS MULTI-COMMANDES AVEC DÉFILEMENT FLUIDE & FIX DE TAILLE */
+.order-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--border);
+  max-width: 100%;
+  width: 100%;
+  flex-wrap: nowrap;
+  scroll-behavior: smooth;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+.order-tabs-bar::-webkit-scrollbar {
+  height: 6px;
+}
+.order-tabs-bar::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 4px;
+}
+.order-tab {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  color: var(--text);
+  flex-shrink: 0;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background .2s, color .2s;
+}
+.order-tab:hover {
+  background: #eae4d5;
+}
+.order-tab.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.order-tab .rename-tab-btn {
+  background: rgba(0,0,0,0.06);
+  color: inherit;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 2px 5px;
+  font-size: 12px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.2s, transform 0.1s;
+}
+.order-tab.active .rename-tab-btn {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.3);
+}
+.order-tab .rename-tab-btn:hover {
+  background: var(--gold);
+  color: #fff;
+  transform: scale(1.05);
+}
+.btn-add-order {
+  background: var(--gold);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  /* Toujours accessible à droite de la barre des commandes */
+  position: sticky;
+  right: 0;
+  z-index: 10;
+  margin-left: auto;
+  box-shadow: -8px 0 12px rgba(0,0,0,.10);
+}
+.btn-add-order:hover {
+  background: #967642;
+}
+
+
+.order-tabs-bar .btn-add-order {
+  isolation: isolate;
+}
+
+/* SOUS-ONGLETS BILANS */
+.bilan-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+  flex-shrink: 0;
+}
+.bilan-tab-btn {
+  padding: 8px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.bilan-tab-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+@media(max-width:1100px){.app{grid-template-columns:75px 1fr}.logo{font-size:0}.logo:before{content:"☕";font-size:24px}.nav button{font-size:0;text-align:center}.nav button:before{font-size:20px}.nav button:nth-child(1):before{content:"▣"}.nav button:nth-child(2):before{content:"☕"}.nav button:nth-child(3):before{content:"👥"}.nav button:nth-child(4):before{content:"📦"}.nav button:nth-child(5):before{content:"📋"}.nav button:nth-child(6):before{content:"💾"}.nav button:nth-child(7):before{content:"🎵"}.nav button:nth-child(8):before{content:"⚙"}.nav button:nth-child(9):before{content:"🎨"}.cards{grid-template-columns:repeat(2,1fr)}.pos{grid-template-columns:1fr}.products{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.main{padding:12px}.cards,.grid2,.grid3{grid-template-columns:1fr}.products{grid-template-columns:repeat(2,1fr)}.form{grid-template-columns:1fr}.app{grid-template-columns:1fr;height:auto;overflow:auto;}.sidebar{height:auto;position:static;display:flex;overflow:auto;padding:8px}.logo{display:none}.nav{display:flex}.nav button{font-size:12px!important;white-space:nowrap}.nav button:before{display:none}.top{align-items:flex-start;flex-direction:column}.top-right{width:100%;justify-content:space-between;margin-top:10px;margin-left:0;}}
+@media print{
+body *{visibility:hidden!important}.receipt-print,.receipt-print *{visibility:visible!important}.receipt-print{position:absolute;left:0;top:0;width:80mm!important;padding:5mm!important;font-family:monospace;background:#fff}
+}
+
+
+/* AMBIANCE CAFÉ — lecteur MP3 local sans intégrer les fichiers audio dans l'EXE */
+.ambiance-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;min-height:0;flex:1}
+.music-player{display:flex;flex-direction:column;gap:15px}
+.music-now{background:#171717;color:#f8f5ec;border:1px solid #80663c;border-radius:6px;padding:22px;box-shadow:var(--shadow)}
+.music-now .music-icon{font-size:46px;margin-bottom:8px}
+.music-now .music-title{font-family:Georgia,serif;font-size:22px;font-weight:700;word-break:break-word}
+.music-now .music-path{font-size:12px;color:#c5bba9;margin-top:6px;word-break:break-all}
+.music-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.music-controls button{padding:10px 14px;border-radius:4px;background:#f8f5ec;border:1px solid #bfb6a7;font-weight:700}
+.music-controls button.primary{background:#171717;color:#fff;border-color:#171717}
+.music-volume{display:flex;align-items:center;gap:8px;flex:1;min-width:180px}
+.music-volume input{width:100%}
+.music-list{display:flex;flex-direction:column;gap:7px;max-height:calc(100vh - 280px);overflow-y:auto}
+.music-track{display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;padding:10px;background:#f8f5ec;border:1px solid var(--border);border-radius:5px}
+.music-track.active{border-color:var(--gold);box-shadow:0 4px 12px rgba(30,25,20,.10)}
+.music-track .track-num{font-weight:800;color:var(--gold);text-align:center}
+.music-track .track-name{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.music-track .track-path{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px}
+.music-track-actions{display:flex;gap:5px}
+.music-track-actions button{padding:7px 9px;border-radius:4px;background:#fff;border:1px solid var(--border)}
+.music-info{font-size:12px;color:var(--muted);line-height:1.5}
+@media(max-width:900px){.ambiance-layout{grid-template-columns:1fr}.music-list{max-height:none}}
+
+.system-signature{
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px dashed var(--border);
+  text-align: center;
+  font-family: Georgia, serif;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+
+/* THÈMES — modification visuelle uniquement, aucune position/taille de l'interface n'est modifiée */
+body[data-theme]{
+  --theme-bg:#e8e3d7;
+  --theme-card:#f8f5ec;
+  --theme-text:#171717;
+  --theme-muted:#68645c;
+  --theme-primary:#171717;
+  --theme-primary-hover:#34312c;
+  --theme-sidebar:#111111;
+  --theme-sidebar-hover:#2b2926;
+  --theme-accent:#aa8951;
+  --theme-border:#c9c1b2;
+  --theme-input:#fbf8f0;
+  --theme-table:#e5dfd3;
+  --theme-danger:#8e2d28;
+  --theme-ok:#3d5748;
+  --theme-shadow:0 12px 30px rgba(20,20,20,.13);
+  background:var(--theme-bg);
+  color:var(--theme-text);
+}
+body[data-theme="classic"]{
+  --theme-bg:#e8e3d7;--theme-card:#f8f5ec;--theme-text:#171717;--theme-muted:#68645c;
+  --theme-primary:#171717;--theme-primary-hover:#34312c;--theme-sidebar:#111;--theme-sidebar-hover:#2b2926;
+  --theme-accent:#aa8951;--theme-border:#c9c1b2;--theme-input:#fbf8f0;--theme-table:#e5dfd3;
+  --theme-danger:#8e2d28;--theme-ok:#3d5748;--theme-shadow:0 12px 30px rgba(20,20,20,.13);
+}
+body[data-theme="cream"]{
+  --theme-bg:#f2eadb;--theme-card:#fffaf0;--theme-text:#38291f;--theme-muted:#806e61;
+  --theme-primary:#8a5a3b;--theme-primary-hover:#6f452d;--theme-sidebar:#3b2519;--theme-sidebar-hover:#5a3927;
+  --theme-accent:#c89452;--theme-border:#dcc8ad;--theme-input:#fffdf8;--theme-table:#eee0cb;
+  --theme-danger:#a13d36;--theme-ok:#3e7558;--theme-shadow:0 12px 30px rgba(75,48,30,.12);
+}
+body[data-theme="night"]{
+  --theme-bg:#15171b;--theme-card:#20242a;--theme-text:#f1f3f5;--theme-muted:#a8afb8;
+  --theme-primary:#d7a45b;--theme-primary-hover:#edbb72;--theme-sidebar:#0b0d10;--theme-sidebar-hover:#292d34;
+  --theme-accent:#d7a45b;--theme-border:#373d46;--theme-input:#1b1f24;--theme-table:#292e35;
+  --theme-danger:#d95c57;--theme-ok:#5eb88c;--theme-shadow:0 12px 30px rgba(0,0,0,.28);
+}
+body[data-theme="bordeaux"]{
+  --theme-bg:#eee4e4;--theme-card:#fff8f7;--theme-text:#2b171b;--theme-muted:#765f63;
+  --theme-primary:#6f2633;--theme-primary-hover:#8b3442;--theme-sidebar:#35151c;--theme-sidebar-hover:#55222c;
+  --theme-accent:#c18a55;--theme-border:#d8c2c4;--theme-input:#fffafa;--theme-table:#eadbde;
+  --theme-danger:#a83e46;--theme-ok:#46725e;--theme-shadow:0 12px 30px rgba(65,25,32,.12);
+}
+body[data-theme="ocean"]{
+  --theme-bg:#e5eff2;--theme-card:#f7fcfd;--theme-text:#152a32;--theme-muted:#61757d;
+  --theme-primary:#17647a;--theme-primary-hover:#23819b;--theme-sidebar:#102d36;--theme-sidebar-hover:#1c4b59;
+  --theme-accent:#4ba5b8;--theme-border:#c3d8de;--theme-input:#fbfeff;--theme-table:#dcecf0;
+  --theme-danger:#a64b4b;--theme-ok:#39765f;--theme-shadow:0 12px 30px rgba(20,70,85,.12);
+}
+body[data-theme="forest"]{
+  --theme-bg:#e7eee7;--theme-card:#f7fbf7;--theme-text:#17261b;--theme-muted:#647368;
+  --theme-primary:#2e6042;--theme-primary-hover:#3c7a54;--theme-sidebar:#172b1d;--theme-sidebar-hover:#29472f;
+  --theme-accent:#a8844d;--theme-border:#c8d7c9;--theme-input:#fbfefb;--theme-table:#dfe9df;
+  --theme-danger:#a64b43;--theme-ok:#397454;--theme-shadow:0 12px 30px rgba(25,65,35,.12);
+}
+body[data-theme] .sidebar{background:var(--theme-sidebar);border-right-color:var(--theme-accent)}
+body[data-theme] .nav button:hover,body[data-theme] .nav button.active{background:var(--theme-sidebar-hover)}
+body[data-theme] .logo span{color:var(--theme-accent)}
+body[data-theme] .main{background:transparent}
+body[data-theme] .card,body[data-theme] .panel{background:var(--theme-card);border-color:var(--theme-border);box-shadow:var(--theme-shadow)}
+body[data-theme] .btn{background:var(--theme-card);border-color:var(--theme-border);color:var(--theme-text)}
+body[data-theme] .btn.primary,body[data-theme] .quick-pay button.selected,body[data-theme] .order-tab.active,body[data-theme] .bilan-tab-btn.active{background:var(--theme-primary);border-color:var(--theme-primary);color:#fff}
+body[data-theme] .btn.primary:hover{background:var(--theme-primary-hover);border-color:var(--theme-primary-hover)}
+body[data-theme] .btn.danger{background:var(--theme-danger);border-color:var(--theme-danger);color:#fff}
+body[data-theme] .btn.ok{background:color-mix(in srgb,var(--theme-ok) 12%,var(--theme-card));border-color:color-mix(in srgb,var(--theme-ok) 30%,var(--theme-border));color:var(--theme-ok)}
+body[data-theme] .product,body[data-theme] .music-track{background:var(--theme-card);border-color:var(--theme-border)}
+body[data-theme] .product:hover{border-color:var(--theme-accent)}
+body[data-theme] .table th{background:var(--theme-table);color:var(--theme-text)}
+body[data-theme] .table td{border-bottom-color:var(--theme-border)}
+body[data-theme] .field input,body[data-theme] .field select,body[data-theme] .toolbar input,body[data-theme] .toolbar select,body[data-theme] .search{background:var(--theme-input);border-color:var(--theme-border);color:var(--theme-text)}
+body[data-theme] .field input:focus,body[data-theme] .field select:focus{border-color:var(--theme-accent)}
+body[data-theme] .order-tab{background:var(--theme-card);border-color:var(--theme-border);color:var(--theme-text)}
+body[data-theme] .order-tab:hover{background:var(--theme-table)}
+body[data-theme] .btn-add-order{background:var(--theme-accent)}
+body[data-theme] .music-now{background:var(--theme-primary);border-color:var(--theme-accent)}
+body[data-theme] .music-controls button,body[data-theme] .music-track-actions button{background:var(--theme-card);border-color:var(--theme-border);color:var(--theme-text)}
+body[data-theme] .music-controls button.primary{background:var(--theme-primary);border-color:var(--theme-primary);color:#fff}
+body[data-theme] .music-track.active{border-color:var(--theme-accent)}
+body[data-theme] .system-signature{color:var(--theme-muted);border-top-color:var(--theme-border)}
+body[data-theme] .toast{background:var(--theme-sidebar)}
+.theme-selector-row{display:flex;flex-direction:column;gap:8px}
+.theme-selector-row select{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);outline:none}
+.theme-selector-row select:focus{border-color:var(--primary)}
+.theme-help{font-size:12px;color:var(--muted);line-height:1.45}
+
+
+/* PERSONNALISATION — sections fixes dans leur propre page */
+#personnalisation{
+  position:relative;
+  overflow-y:auto;
+  padding-bottom:90px;
+}
+#personnalisation .personalization-theme-panel{
+  position:sticky;
+  top:0;
+  z-index:20;
+  margin-top:0;
+  backdrop-filter:blur(8px);
+}
+#personnalisation .startup-video-panel{
+  position:sticky;
+  bottom:0;
+  z-index:19;
+  backdrop-filter:blur(8px);
+}
+#startupVideoOverlay{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  background:#000;
+  z-index:2147483647;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+#startupVideoOverlay.open{display:flex}
+#startupVideoOverlay video{
+  width:100vw;
+  height:100vh;
+  object-fit:cover;
+  background:#000;
+  display:block;
+}
+
+</style>
+</head>
+<body class="logged-in">
+
+<div class="app">
+<aside class="sidebar">
+  <div class="logo" id="sidebarLogoDisplay"><span class="cafe-name-display">MON CAFÉ</span></div>
+  <div class="nav">
+    <button class="active" data-page="dashboard">Tableau de bord</button>
+    <button data-page="caisse">Caisse</button>
+    <button data-page="clients">Clients &amp; Crédits</button>
+    <button data-page="articles">Articles</button>
+    <button data-page="tickets">Tickets</button>
+    <button data-page="sauvegardes">Sauvegardes &amp; Bilans</button>
+    <button data-page="ambiance">Ambiance Café</button>
+    <button data-page="parametres">Paramètres</button>
+    <button data-page="personnalisation">Personnalisation</button>
+  </div>
+</aside>
+
+<main class="main">
+<header class="top">
+  <div>
+    <h1 id="pageTitle">Tableau de bord</h1>
+    <div class="subtitle">Caisse professionnelle · <span class="cafe-name-display">Mon Café</span> · Casablanca</div>
+  </div>
+  <div class="top-right">
+    <div class="actions">
+      <button class="btn ok" onclick="confirmCloseRegister()">💾 Sauvegarder</button>
+    </div>
+  </div>
+</header>
+
+<section id="dashboard" class="page active">
+  <div class="cards">
+    <div class="card"><div class="kpi-label">CA aujourd'hui</div><div class="kpi" id="kpiCA">0,00 DH</div></div>
+    <div class="card"><div class="kpi-label">Tickets aujourd'hui</div><div class="kpi" id="kpiTickets">0</div></div>
+    <div class="card"><div class="kpi-label">Total Crédits En Cours</div><div class="kpi" id="kpiCredits">0,00 DH</div></div>
+    <div class="card"><div class="kpi-label">Nombre de Clients</div><div class="kpi" id="kpiCustomers">0</div></div>
+  </div>
+  <div class="panel"><h2>Derniers tickets</h2><div id="dashTickets"></div></div>
+</section>
+
+<section id="caisse" class="page">
+  <!-- ONGLETS MULTI-COMMANDES AVEC DEFILEMENT FLUIDE -->
+  <div class="order-tabs-bar" id="orderTabsBar"></div>
+
+  <div class="pos">
+    <div>
+      <div class="toolbar"><input class="search" id="productSearch" placeholder="🔎 Rechercher un produit..." oninput="renderProducts()" style="margin:0;flex:1"><select id="catFilter" onchange="renderProducts()"><option value="">Toutes les catégories</option></select></div>
+      <div class="products" id="products"></div>
+    </div>
+    <div class="panel cart">
+      <h2>Ticket en cours <span id="cartCount" class="badge ok">0 article</span></h2>
+      <div id="cartList" class="cart-list"></div>
+      <div class="totals">
+        <div class="total-line"><span>Sous-total</span><strong id="subtotal">0,00 DH</strong></div>
+        <div class="total-line"><span>Remise</span><input id="discount" type="number" min="0" value="0" style="width:90px;padding:5px;border:1px solid var(--border);border-radius:6px" oninput="updateDiscount(this.value)"></div>
+        <div class="total-line grand"><span>TOTAL</span><strong id="total">0,00 DH</strong></div>
+      </div>
+      <div class="quick-pay">
+        <button class="selected" onclick="setPayment('Espèces',this)">💵 Espèces</button>
+        <button onclick="setPayment('Carte',this)">💳 Carte</button>
+        <button onclick="setPayment('Crédit',this)">📋 Crédit</button>
+        <button onclick="setPayment('Autre',this)">Autre</button>
+      </div>
+      
+      <div id="creditCustomerBox" class="field full" style="display:none; margin-top:10px;">
+        <label>Client à débiter :</label>
+        <select id="creditCustomerSelect" onchange="updateCustomerSelect(this.value)"></select>
+      </div>
+
+      <button class="btn primary" style="width:100%;margin-top:12px;padding:14px" onclick="finishSale()">✓ ENCAISSER LA COMMANDE</button>
+      <button class="btn danger" style="width:100%;margin-top:7px" onclick="confirmClearCart()">🗑️ Vider la caisse &amp; Fermer l'onglet</button>
+    </div>
+  </div>
+</section>
+
+<section id="clients" class="page">
+  <div class="actions" style="margin-bottom:13px">
+    <button class="btn primary" onclick="openCustomerModal()">+ Nouveau client</button>
+  </div>
+  <div class="panel">
+    <div class="toolbar">
+      <input id="customerSearch" placeholder="🔎 Rechercher un client..." oninput="renderCustomers()">
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Nom</th><th>Téléphone</th><th>Dette Restante</th><th>Actions</th></tr></thead>
+        <tbody id="customerTable"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="articles" class="page">
+  <div class="actions" style="margin-bottom:13px">
+    <button class="btn primary" onclick="openArticleModal()">+ Nouvel article</button>
+  </div>
+  <div class="panel">
+    <div class="toolbar">
+      <input id="articleSearch" placeholder="🔎 Rechercher un article..." oninput="renderArticles()">
+      <select id="articleCat" onchange="renderArticles()"><option value="">Tous les types</option></select>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Article</th><th>Type</th><th>Prix</th><th>Actions</th></tr></thead>
+        <tbody id="articleTable"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="tickets" class="page">
+  <div class="panel">
+    <div class="toolbar">
+      <input id="ticketSearch" placeholder="N° ticket, employé, paiement..." oninput="renderTickets()">
+      <input id="ticketDate" type="date" onchange="renderTickets()">
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ticket</th>
+            <th>Date</th>
+            <th>Paiement</th>
+            <th>Client</th>
+            <th>Articles</th>
+            <th>Total</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ticketTable"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- SAUVEGARDES & BILANS -->
+<section id="sauvegardes" class="page">
+  <div class="actions" style="margin-bottom:13px; display:flex; gap:10px; flex-wrap:wrap;">
+    <button class="btn ok" onclick="checkSecurityCode(()=>exportFullDataBackup())">💾 Télécharger Sauvegarde JSON Manuel</button>
+    <button class="btn primary" onclick="manualGenerateWeeklyBackup()">📊 Enregistrer Bilan Semaine Courante</button>
+  </div>
+  
+  <div class="bilan-tabs">
+    <button id="btnTabDay" class="bilan-tab-btn active" onclick="switchBilanTab('day')">📅 Bilan par Jour</button>
+    <button id="btnTabWeek" class="bilan-tab-btn" onclick="switchBilanTab('week')">📊 Bilan par Semaine</button>
+  </div>
+
+  <div id="bilanDaySection" class="panel">
+    <h2>Bilan Journalier (Quotidien 24h) avec Dettes Mises à Jour</h2>
+    <div class="toolbar">
+      <label style="align-self:center; font-weight:bold;">Sélectionner le jour :</label>
+      <input type="date" id="dailyBilanDate" onchange="renderDailyBilanTable()">
+      <button class="btn ok" onclick="triggerSelectedDailyExcel()">📥 Télécharger Excel Quotidien (avec Dettes)</button>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>N° Ticket</th>
+            <th>Heure</th>
+            <th>Paiement</th>
+            <th>Client</th>
+            <th>Dette Client Mise à Jour</th>
+            <th>Articles Détail</th>
+            <th>Montant</th>
+          </tr>
+        </thead>
+        <tbody id="dailyBilanTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="bilanWeekSection" class="panel" style="display:none;">
+    <h2>Historique des Bilans Hebdomadaires Numériques</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Période (Semaine)</th>
+            <th>Nbre Tickets</th>
+            <th>CA Total</th>
+            <th>Espèces</th>
+            <th>Carte</th>
+            <th>Crédit</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="backupTable"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+<section id="ambiance" class="page">
+  <div class="ambiance-layout">
+    <div class="panel music-player">
+      <div>
+        <h2>☕ Ambiance Café</h2>
+        <div class="music-info">
+          Importez vos fichiers MP3 locaux. Les fichiers audio ne sont pas copiés dans le système :
+          seules leurs références locales sont conservées. La musique reste donc en dehors du fichier HTML/EXE.
+        </div>
+      </div>
+
+      <div class="music-now">
+        <div class="music-icon">🎵</div>
+        <div class="music-title" id="musicNowTitle">Aucune musique sélectionnée</div>
+        <div class="music-path" id="musicNowPath">Importez un ou plusieurs MP3 pour commencer.</div>
+      </div>
+
+      <audio id="ambientAudio" preload="metadata" style="width:100%;"></audio>
+
+      <div class="music-controls">
+        <button onclick="musicPrevious()">⏮ Précédente</button>
+        <button class="primary" id="musicPlayBtn" onclick="toggleMusicPlayback()">▶ Lire</button>
+        <button onclick="musicNext()">Suivante ⏭</button>
+        <div class="music-volume">
+          <span>🔊</span>
+          <input id="musicVolume" type="range" min="0" max="1" step="0.01" value="0.8" oninput="setMusicVolume(this.value)">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" onclick="importMusicFiles()">＋ Importer des MP3</button>
+        <button class="btn" onclick="requestMusicPermissions()">🔓 Réautoriser l'accès aux musiques</button>
+        <input id="musicFileInput" type="file" accept=".mp3,audio/mpeg,audio/*" multiple hidden onchange="handleMusicFallbackFiles(event)">
+      </div>
+
+      <div class="music-info">
+        <strong>Lecture automatique :</strong> lorsqu'un morceau se termine, le suivant est lancé automatiquement.
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Playlist</h2>
+      <div id="musicList" class="music-list">
+        <div class="empty">Aucune musique importée.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="parametres" class="page">
+  <div class="grid2">
+    <div class="panel">
+      <h2>Informations du café</h2>
+      <div class="form">
+        <div class="field full"><label>Nom du café</label><input id="setName"></div>
+        <div class="field"><label>Téléphone</label><input id="setPhone"></div>
+        <div class="field"><label>Devise</label><input id="setCurrency"></div>
+        <div class="field full"><label>Adresse affichée sur les tickets</label><input id="setAddress"></div>
+        <div class="field full"><label>Message de bas de ticket</label><input id="setFooter"></div>
+        <div class="field full"><label>Message de confirmation d'encaissement</label><input id="setSuccessMsg"></div>
+        
+        <div class="field full" style="margin-top:10px; padding-top:12px; border-top:1px dashed var(--border);">
+          <label style="font-weight:bold; color:var(--text); font-size:13px; margin-bottom:8px;">Options d'impression de ticket</label>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <label class="field-checkbox">
+              <input type="checkbox" id="setPrintEnabled" onchange="togglePrintOptionsDisplay()">
+              <span>Activer la fonction d'impression des tickets</span>
+            </label>
+            <div id="subPrintOptions" style="padding-left:28px; display:flex; flex-direction:column; gap:8px;">
+              <label class="field-checkbox">
+                <input type="checkbox" id="setAutoPrint">
+                <span>Imprimer automatiquement après encaissement</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="field full" style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
+          <label>Temps d'utilisation total</label>
+          <input id="setTotalUsageTime" readonly style="background:#e9ecef; cursor:not-allowed; font-weight:bold;" value="0 min">
+        </div>
+
+        <!-- EMPLACEMENTS DISTINCTS EXCEL ET JSON DANS PARAMÈTRES -->
+        <div class="field full" style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
+          <label style="font-weight:bold; color:var(--text); font-size:13px;">Gestion des Emplacements de Fichiers</label>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:6px;">
+            <button type="button" class="btn" style="width:100%; text-align:left;" onclick="selectBackupFolder('excel')">📊 Emplacement Exports Excel Automatiques (.xlsx)</button>
+            <button type="button" class="btn" style="width:100%; text-align:left;" onclick="selectBackupFolder('json')">📁 Emplacement Sauvegardes JSON Automatiques (30 min)</button>
+          </div>
+        </div>
+      </div>
+      <button class="btn primary" style="margin-top:13px" onclick="saveSettings()">Enregistrer</button>
+    </div>
+    
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div class="panel">
+        <h2>Sécurité &amp; Mot de passe</h2>
+        <div class="form">
+          <div class="field full"><label>Ancien mot de passe</label><input type="password" id="oldSecCode" placeholder="Mot de passe actuel"></div>
+          <div class="field full"><label>Nouveau mot de passe</label><input type="password" id="newSecCode" placeholder="Nouveau mot de passe"></div>
+        </div>
+        <button class="btn primary" style="margin-top:13px" onclick="updateSecurityCode()">Modifier le mot de passe</button>
+      </div>
+
+      <div class="panel">
+        <h2>Restauration</h2>
+        <p style="color:var(--muted);font-size:13px">Les articles, clients, ventes, bilans et paramètres sont conservés en permanence.</p>
+        <button class="btn" style="margin-top:5px;" onclick="document.getElementById('importFile').click()">Importer un fichier de sauvegarde (.json)</button>
+        <input id="importFile" type="file" accept=".json" hidden onchange="importDataBackup(event)">
+      </div>
+    </div>
+  </div>
+<div class="system-signature cafe-name-display">MON CAFÉ</div>
+</section>
+
+<section id="personnalisation" class="page">
+  <div class="panel personalization-theme-panel">
+    <h2>🎨 Thèmes</h2>
+    <div class="theme-selector-row">
+      <label for="themeSelect" style="font-size:12px;color:var(--muted);font-weight:700;">Choisir l'apparence de l'application</label>
+      <select id="themeSelect" onchange="changeTheme(this.value)">
+        <option value="classic">Classique</option>
+        <option value="cream">Café Crème</option>
+        <option value="night">Nuit Élégante</option>
+        <option value="bordeaux">Bordeaux</option>
+        <option value="ocean">Océan</option>
+        <option value="forest">Forêt</option>
+      </select>
+      <div class="theme-help">Les thèmes modifient uniquement les couleurs, contrastes et l'ambiance visuelle. La disposition, les dimensions et le fonctionnement restent inchangés.</div>
+    </div>
+  </div>
+
+  <div class="panel startup-video-panel">
+    <h2>🎬 Personnaliser le démarrage</h2>
+    <div class="theme-help">
+      Sélectionnez un fichier MP4 avec « Choisir MP4 ». À chaque démarrage,
+      la vidéo s'affiche en plein écran pendant 6 secondes puis disparaît automatiquement.
+    </div>
+
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;">
+      <input id="startupVideoPath" type="text"
+             placeholder="Chemin du fichier MP4 (ex. C:\Videos\demarrage.mp4)"
+             style="flex:1;min-width:260px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);">
+      <button type="button" class="btn primary" onclick="document.getElementById('startupVideoFile').click()">📁 Choisir MP4</button>
+      <input id="startupVideoFile" type="file" accept="video/mp4,.mp4" hidden
+             onchange="handleStartupVideoFile(event)">
+      <button type="button" class="btn primary" onclick="saveStartupVideoSettings()">Enregistrer</button>
+      <button type="button" class="btn danger" onclick="clearStartupVideoSettings()">Désactiver</button>
+    </div>
+
+    <div id="startupVideoStatus" class="theme-help" style="margin-top:8px;"></div>
+  </div>
+
+  <div class="system-signature"><span class="cafe-name-display">MON CAFÉ</span> · PERSONNALISATION</div>
+</section>
+
+</main>
+</div>
+
+
+<div id="startupVideoOverlay" aria-hidden="true">
+  <video id="startupVideo" playsinline webkit-playsinline preload="auto"></video>
+</div>
+
+<div id="modal" class="modal"><div class="modal-box"><div class="modal-head"><h2 id="modalTitle" style="margin:0"></h2><button class="btn" id="closeModalBtn" onclick="closeModal()">✕</button></div><div id="modalBody"></div></div></div>
+<div id="toast" class="toast"></div>
+<div id="receipt" class="receipt-print" style="display:none"></div>
+
+<script>
+
+// --- PERSONNALISATION ---
+const STARTUP_VIDEO_PATH_KEY = 'cafeStartupVideoPath';
+const STARTUP_VIDEO_DB = 'CafeStartupVideoDB';
+const STARTUP_VIDEO_STORE = 'video';
+
+function renderPersonalisation(){
+  const select = document.getElementById('themeSelect');
+  if(select) select.value = localStorage.getItem(BOGART_THEME_KEY) || 'classic';
+  updateStartupVideoStatus();
+}
+
+function openPersonalisation(){
+  checkSecurityCode(() => executePageSwitch('personnalisation'));
+}
+
+/* WebView2 ne fournit pas file.path au JavaScript. On stocke donc le MP4
+   sélectionné directement dans IndexedDB et on le relit au démarrage. */
+function openStartupVideoDB(){
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(STARTUP_VIDEO_DB, 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if(!db.objectStoreNames.contains(STARTUP_VIDEO_STORE))
+        db.createObjectStore(STARTUP_VIDEO_STORE);
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function saveStartupVideoFile(file){
+  const db = await openStartupVideoDB();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(STARTUP_VIDEO_STORE, 'readwrite');
+    tx.objectStore(STARTUP_VIDEO_STORE).put(file, 'startup');
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+  db.close();
+  localStorage.setItem(STARTUP_VIDEO_PATH_KEY, file.name);
+}
+
+async function getStartupVideoFile(){
+  try{
+    const db = await openStartupVideoDB();
+    const file = await new Promise((resolve, reject) => {
+      const tx = db.transaction(STARTUP_VIDEO_STORE, 'readonly');
+      const req = tx.objectStore(STARTUP_VIDEO_STORE).get('startup');
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+    db.close();
+    return file;
+  }catch(e){
+    console.error('Erreur IndexedDB vidéo:', e);
+    return null;
+  }
+}
+
+async function deleteStartupVideoFile(){
+  try{
+    const db = await openStartupVideoDB();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STARTUP_VIDEO_STORE, 'readwrite');
+      tx.objectStore(STARTUP_VIDEO_STORE).delete('startup');
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  }catch(e){}
+  localStorage.removeItem(STARTUP_VIDEO_PATH_KEY);
+}
+
+async function handleStartupVideoFile(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+
+  if(file.type !== 'video/mp4' && !/\.mp4$/i.test(file.name)){
+    toast('Veuillez choisir un fichier MP4.');
+    event.target.value = '';
+    return;
+  }
+
+  try{
+    await saveStartupVideoFile(file);
+    const input = document.getElementById('startupVideoPath');
+    if(input) input.value = file.name;
+    await updateStartupVideoStatus();
+    toast('Vidéo de démarrage enregistrée.');
+  }catch(e){
+    console.error(e);
+    toast('Impossible d’enregistrer la vidéo.');
+  }
+  event.target.value = '';
+}
+
+async function saveStartupVideoSettings(){
+  const file = await getStartupVideoFile();
+  if(file){
+    await updateStartupVideoStatus();
+    toast('Vidéo de démarrage enregistrée.');
+    return;
+  }
+  toast('Utilisez « Choisir MP4 » pour sélectionner la vidéo.');
+}
+
+async function clearStartupVideoSettings(){
+  await deleteStartupVideoFile();
+  const input = document.getElementById('startupVideoPath');
+  const picker = document.getElementById('startupVideoFile');
+  if(input) input.value = '';
+  if(picker) picker.value = '';
+  await updateStartupVideoStatus();
+  toast('Vidéo de démarrage désactivée.');
+}
+
+async function updateStartupVideoStatus(){
+  const file = await getStartupVideoFile();
+  const input = document.getElementById('startupVideoPath');
+  const status = document.getElementById('startupVideoStatus');
+
+  if(input) input.value = file ? file.name : '';
+  if(status){
+    status.textContent = file
+      ? '✓ Vidéo enregistrée : ' + file.name
+      : 'Aucune vidéo de démarrage configurée.';
+  }
+}
+
+async function playStartupVideo(){
+  const overlay = document.getElementById('startupVideoOverlay');
+  const video = document.getElementById('startupVideo');
+  if(!overlay || !video) return;
+
+  const file = await getStartupVideoFile();
+  if(!file) return;
+
+  const blobUrl = URL.createObjectURL(file);
+  let closed = false;
+
+  const close = () => {
+    if(closed) return;
+    closed = true;
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden','true');
+    try{ video.pause(); }catch(e){}
+    video.removeAttribute('src');
+    video.load();
+    URL.revokeObjectURL(blobUrl);
+  };
+
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden','false');
+
+  video.muted = true;
+  video.defaultMuted = true;
+  video.volume = 0;
+  video.controls = false;
+  video.autoplay = true;
+  video.playsInline = true;
+  video.src = blobUrl;
+
+  const timer = setTimeout(close, 6000);
+
+  video.onerror = () => {
+    clearTimeout(timer);
+    close();
+    toast('Impossible de lire la vidéo MP4.');
+  };
+
+  video.onloadeddata = () => {
+    const promise = video.play();
+    if(promise && promise.catch) promise.catch(()=>{});
+  };
+
+  video.load();
+  setTimeout(() => {
+    const promise = video.play();
+    if(promise && promise.catch) promise.catch(()=>{});
+  }, 150);
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await updateStartupVideoStatus();
+  setTimeout(playStartupVideo, 120);
+});
+
+// --- FONCTIONS UTILITAIRES DE SÉCURITÉ ---
+function encodeBase64(str) {
+  try { return btoa(unescape(encodeURIComponent(str))); } catch(e) { return str; }
+}
+function decodeBase64(str) {
+  try { return decodeURIComponent(escape(atob(str))); } catch(e) { return str; }
+}
+
+// --- LOGIQUE DE STOCKAGE ACCÈS DOSSIERS SÉPARÉS (Excel / JSON) ---
+function getDBHandle() {
+  return new Promise((resolve, reject) => {
+    let req = indexedDB.open("CafeStorage", 1);
+    req.onupgradeneeded = () => req.result.createObjectStore("handles");
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveDirectoryHandle(handle, keyName = "backupDirJson") {
+  let dbInstance = await getDBHandle();
+  let tx = dbInstance.transaction("handles", "readwrite");
+  tx.objectStore("handles").put(handle, keyName);
+}
+
+async function getDirectoryHandle(keyName = "backupDirJson") {
+  try {
+    let dbInstance = await getDBHandle();
+    let tx = dbInstance.transaction("handles", "readonly");
+    let req = tx.objectStore("handles").get(keyName);
+    return new Promise((resolve) => {
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    });
+  } catch (e) {
+    return null;
+  }
+}
+
+async function selectBackupFolder(type = 'json') {
+  if (!('showDirectoryPicker' in window)) {
+    toast("Votre navigateur ne supporte pas l'accès direct aux dossiers.");
+    return false;
+  }
+  try {
+    const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    let key = (type === 'excel') ? "backupDirExcel" : "backupDirJson";
+    await saveDirectoryHandle(handle, key);
+    toast(`Emplacement des fichiers ${type.toUpperCase()} mis à jour avec succès !`);
+    return true;
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      toast("Erreur lors de la sélection du dossier.");
+    }
+    return false;
+  }
+}
+
+function generateLiteData() {
+  return JSON.stringify({
+    v: 1,
+    ts: new Date().toISOString(),
+    st: db.settings,
+    pr: db.products,
+    cs: db.customers,
+    sl: db.sales.map(s => ({
+      i: s.id,
+      d: s.date,
+      p: s.payment,
+      c: s.customerId,
+      t: s.total,
+      it: (s.items || []).map(item => ({ id: item.id, q: item.qty, p: item.price }))
+    })),
+    wb: db.weeklyBackups,
+    tm: db.totalUsageMinutes || 0,
+    lastDailyExportDate: db.lastDailyExportDate || '',
+    lastWeeklyExportSunday: db.lastWeeklyExportSunday || ''
+  }, null, 2);
+}
+
+// FONCTION EXPORT SECURISEE JSON POUR CHROMIUM
+function downloadJSONFile(content, fileName) {
+  const blob = new Blob([content], { type: 'application/json;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 100);
+}
+
+function exportFullDataBackup() {
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10);
+  const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '-');
+  const fileName = `backup_manuel_${dateStr}_${timeStr}.json`;
+  
+  downloadJSONFile(generateLiteData(), fileName);
+  toast('Sauvegarde JSON téléchargée avec succès !');
+}
+
+function importDataBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importedData = JSON.parse(e.target.result);
+      if (importedData && importedData.st && importedData.pr) {
+        db.settings = importedData.st;
+        db.products = importedData.pr;
+        db.customers = importedData.cs || [];
+        db.sales = (importedData.sl || []).map(s => ({
+          id: s.i,
+          date: s.d,
+          payment: s.p,
+          customerId: s.c,
+          total: s.t,
+          items: (s.it || []).map(item => ({ id: item.id, qty: item.q, price: item.p }))
+        }));
+        db.weeklyBackups = importedData.wb || [];
+        db.totalUsageMinutes = importedData.tm || 0;
+        db.lastDailyExportDate = importedData.lastDailyExportDate || '';
+        db.lastWeeklyExportSunday = importedData.lastWeeklyExportSunday || '';
+        
+        save();
+        updateUIWithCafeName();
+        toast('Données restaurées avec succès !');
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        toast('Format de fichier invalide.');
+      }
+    } catch (err) {
+      toast('Erreur lors de la lecture du fichier JSON.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+
+// AUTORISATION PREMIÈRE OUVERTURE DES TÉLÉCHARGEMENTS
+async function requestAutoDownloadPermission(){
+  try{
+    const testName = `download_permission_${Date.now()}.txt`;
+    const blob = new Blob(['Autorisation des téléchargements automatiques'], {type:'text/plain;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = testName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 250);
+
+    localStorage.setItem('cafeAutoDownloadAuthorized','1');
+    if(db && db.settings){
+      db.settings.autoDownloadAuthorized = true;
+      save();
+    }
+
+    const status = document.getElementById('initDownloadStatus');
+    if(status) status.textContent = '✓ Autorisation initialisée. Les sauvegardes automatiques pourront maintenant être téléchargées sans nouvelle action.';
+    const btn = document.getElementById('initDownloadBtn');
+    if(btn) btn.textContent = '✓ Téléchargements automatiques autorisés';
+    toast('Autorisation des téléchargements automatiques enregistrée.');
+    return true;
+  }catch(e){
+    console.error('Autorisation téléchargements :',e);
+    toast('Impossible d’initialiser l’autorisation des téléchargements.');
+    return false;
+  }
+}
+
+// SAUVEGARDE AUTOMATIQUE JSON TOUTES LES 30 MIN
+async function performHourlyBackup() {
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10);
+  const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '-');
+  const fileName = `backup_30min_${dateStr}_${timeStr}.json`;
+  const content = generateLiteData();
+
+  if (!('showDirectoryPicker' in window)) {
+    try {
+      downloadJSONFile(content, fileName);
+      console.warn("File System Access indisponible, sauvegarde JSON envoyée au téléchargement Chromium.");
+      return true;
+    } catch (e) {
+      console.error("Échec de la sauvegarde JSON Chromium :", e);
+      toast("🚨 ÉCHEC DE LA SAUVEGARDE JSON : vérifiez les téléchargements Chromium.");
+      return false;
+    }
+  }
+
+  const dirHandle = await getDirectoryHandle("backupDirJson");
+
+  if (!dirHandle) {
+    try {
+      downloadJSONFile(content, fileName);
+      console.warn("Aucun dossier JSON configuré, sauvegarde envoyée au téléchargement.");
+      return true;
+    } catch (e) {
+      console.error("Échec du téléchargement de secours :", e);
+      return false;
+    }
+  }
+
+  try {
+    const opts = { mode: 'readwrite' };
+
+    if ((await dirHandle.queryPermission(opts)) !== 'granted') {
+      if ((await dirHandle.requestPermission(opts)) !== 'granted') {
+        downloadJSONFile(content, fileName);
+        toast("⚠️ Permission du dossier perdue : sauvegarde JSON téléchargée en secours.");
+        return false;
+      }
+    }
+
+    if (navigator.storage && navigator.storage.estimate) {
+      const quota = await navigator.storage.estimate();
+      if (quota.quota && quota.usage !== undefined) {
+        const freeSpaceMB = (quota.quota - quota.usage) / (1024 * 1024);
+        if (freeSpaceMB < 300) {
+          toast(`🚨 ALERTE : Espace disque faible ! (${freeSpaceMB.toFixed(0)} Mo libres)`);
+        }
+      }
+    }
+
+    const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(content);
+    await writable.close();
+
+    return true;
+  } catch (e) {
+    console.error("Échec de la sauvegarde automatique JSON dans le dossier :", e);
+
+    try {
+      downloadJSONFile(content, fileName);
+      toast("⚠️ Sauvegarde dossier impossible : copie JSON téléchargée en secours.");
+    } catch (fallbackError) {
+      console.error("Échec de la sauvegarde JSON de secours :", fallbackError);
+      toast("🚨 ÉCHEC CRITIQUE DE LA SAUVEGARDE JSON.");
+    }
+
+    return false;
+  }
+}
+setInterval(() => {
+  performHourlyBackup().catch(err => console.error("Erreur de sauvegarde périodique :", err));
+}, 1800000);
+
+if(localStorage.getItem('cafeConfigured') === '1'){
+  performHourlyBackup().catch(err => console.error(err));
+}
+
+window.addEventListener('beforeunload', function (e) {
+  let activeCmd = getActiveOrder();
+  if (activeCmd && activeCmd.cart && activeCmd.cart.length > 0) {
+    e.preventDefault();
+    e.returnValue = 'Des commandes sont en cours dans la caisse. Voulez-vous vraiment quitter ?';
+  }
+});
+
+function esc(str){
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showFirstLoginSetup(){
+  openModal('⚙️ Première Connexion - Configuration Initiale', `
+    <div style="padding:5px;">
+      <p style="margin-bottom:15px; color:var(--muted); font-size:13px;">Bienvenue dans votre système de gestion. Veuillez compléter obligatoirement tous les champs avant de poursuivre :</p>
+      <div class="form">
+        <div class="field full"><label>Nom du Café *</label><input id="initName" value="" placeholder="Ex: Mon Café"></div>
+        <div class="field"><label>Téléphone *</label><input id="initPhone" value="" placeholder="Ex: 0522000000"></div>
+        <div class="field"><label>Devise *</label><input id="initCurrency" value="" placeholder="Ex: DH"></div>
+        <div class="field full"><label>Adresse *</label><input id="initAddress" value="" placeholder="Adresse de l'établissement"></div>
+        <div class="field full"><label>Code de Sécurité (Accès gérant) *</label><input type="password" id="initCode" value="" placeholder="Définir un mot de passe"></div>
+        <div class="field full" style="margin-top:5px;">
+          <label>Emplacement local des Sauvegardes JSON *</label>
+          <button type="button" id="initBackupBtn" class="btn" style="width:100%; text-align:left;" onclick="selectBackupFolder('json')">📁 Choisir l'emplacement local (Obligatoire)</button>
+        </div>
+        <div class="field full" style="margin-top:5px;">
+          <label>Autorisation des téléchargements automatiques *</label>
+          <button type="button" id="initDownloadBtn" class="btn" style="width:100%; text-align:left;" onclick="requestAutoDownloadPermission()">⬇️ Autoriser les téléchargements en arrière-plan</button>
+          <div id="initDownloadStatus" style="font-size:12px;color:var(--muted);margin-top:5px;">Cette autorisation est demandée une seule fois au premier démarrage.</div>
+        </div>
+      </div>
+      <button class="btn primary" style="width:100%; margin-top:20px; padding:12px;" onclick="saveFirstLoginSetup()">Enregistrer & Démarrer</button>
+    </div>
+  `);
+  document.getElementById('closeModalBtn').style.display = 'none';
+}
+
+async function saveFirstLoginSetup(){
+  let name = document.getElementById('initName').value.trim();
+  let phone = document.getElementById('initPhone').value.trim();
+  let currency = document.getElementById('initCurrency').value.trim();
+  let address = document.getElementById('initAddress').value.trim();
+  let code = document.getElementById('initCode').value.trim();
+
+  let dirHandle = await getDirectoryHandle("backupDirJson");
+  let downloadAuthorized = localStorage.getItem('cafeAutoDownloadAuthorized') === '1';
+
+  if(!name || !phone || !currency || !address || !code || !dirHandle || !downloadAuthorized){ 
+    return toast('Tous les champs, le nom du café, le dossier de sauvegarde et l’autorisation des téléchargements sont obligatoires.'); 
+  }
+
+  db.settings.name = name;
+  db.settings.phone = phone;
+  db.settings.currency = currency;
+  db.settings.address = address;
+  db.settings.footer = 'Merci et à bientôt — ' + name;
+  db.settings.securityCode = encodeBase64(code);
+  save();
+
+  updateUIWithCafeName();
+
+  localStorage.setItem('cafeConfigured', '1');
+  document.getElementById('closeModalBtn').style.display = 'inline-block';
+  closeModal();
+  toast('Configuration initiale enregistrée avec succès !');
+
+  performHourlyBackup().catch(err => console.error(err));
+}
+
+function getStoredSecurityCodeBase64(){
+  return db.settings?.securityCode || encodeBase64("Bogard00");
+}
+
+function checkSecurityCode(callback){
+  openModal('🔒 Autorisation Requise', `
+    <div style="text-align:center; padding:10px 0;">
+      <p style="margin-bottom:15px; font-weight:600; color:var(--text);">Veuillez saisir le code de sécurité pour autoriser cette action :</p>
+      <input type="password" id="modalSecCode" placeholder="Code de sécurité" style="width:100%; padding:12px; font-size:16px; text-align:center; border:1px solid var(--border); border-radius:6px; margin-bottom:12px;" autofocus>
+      <div id="secCodeError" style="color:var(--danger); font-weight:bold; display:none; margin-bottom:12px; font-size:13px;">⚠️ Code incorrect ! Action annulée.</div>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+        <button class="btn danger" style="flex:1;" onclick="closeModal()">Annuler</button>
+        <button class="btn primary" style="flex:1;" id="btnSecSubmit">Valider</button>
+      </div>
+    </div>
+  `);
+  setTimeout(()=>{
+    const inp = document.getElementById('modalSecCode');
+    const btn = document.getElementById('btnSecSubmit');
+    if(btn) btn.onclick = () => validateSecurityCode(callback);
+    if(inp){
+      inp.focus();
+      inp.onkeydown = function(e){ if(e.key === 'Enter') validateSecurityCode(callback); };
+    }
+  }, 100);
+}
+
+function validateSecurityCode(callback){
+  const inp = document.getElementById('modalSecCode');
+  const err = document.getElementById('secCodeError');
+  const currentCodeB64 = getStoredSecurityCodeBase64();
+  
+  if(inp && encodeBase64(inp.value) === currentCodeB64){
+    closeModal();
+    if(typeof callback === 'function') callback();
+  } else {
+    if(err) err.style.display = 'block';
+    if(inp) { inp.value = ''; inp.focus(); }
+  }
+}
+
+function updateSecurityCode(){
+  let oldPass = document.getElementById('oldSecCode').value;
+  let newPass = document.getElementById('newSecCode').value;
+  let currentCodeB64 = getStoredSecurityCodeBase64();
+
+  if(!oldPass || !newPass){
+    return toast('Veuillez remplir tous les champs de mot de passe');
+  }
+  if(encodeBase64(oldPass) !== currentCodeB64){
+    return toast('L\'ancien mot de passe est incorrect');
+  }
+  if(newPass.length < 4){
+    return toast('Le nouveau mot de passe est trop court (4 caractères min)');
+  }
+
+  if(!db.settings) db.settings = {};
+  db.settings.securityCode = encodeBase64(newPass);
+  save();
+  document.getElementById('oldSecCode').value = '';
+  document.getElementById('newSecCode').value = '';
+  toast('Mot de passe mis à jour avec succès');
+}
+
+function confirmCloseRegister(){
+  openModal('💾 Sauvegarde', `
+    <div style="text-align:center; padding:10px 0;">
+      <p style="margin-bottom:20px; font-size:15px; font-weight:600;">Voulez-vous enregistrer le bilan hebdomadaire et actualiser les données ?</p>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button class="btn" style="flex:1;" onclick="closeModal()">Annuler</button>
+        <button class="btn ok" style="flex:1;" onclick="closeModal(); executeCloseRegister();">Confirmer la sauvegarde</button>
+      </div>
+    </div>
+  `);
+}
+
+function executeCloseRegister(){
+  manualGenerateWeeklyBackup();
+  toast('Sauvegarde effectuée avec succès');
+}
+
+const KEY='cafe_manager_v2';
+const PENDING_ORDERS_KEY='cafe_pending_orders';
+
+const defaults={
+  settings:{
+    name:'',
+    phone:'',
+    currency:'',
+    address:'',
+    footer:'Merci et à bientôt',
+    successMessage:'Vente enregistrée avec succès !',
+    securityCode:'',
+    printEnabled:true,
+    autoPrint:false,
+    autoDownloadAuthorized:false
+  },
+  products:[
+    {id:1,name:'Café',cat:'Boissons chaudes',price:12,unit:'pièce',emoji:'☕'},
+    {id:2,name:'Café au lait',cat:'Boissons chaudes',price:15,unit:'pièce',emoji:'🥛'},
+    {id:3,name:'Thé à la menthe',cat:'Boissons chaudes',price:12,unit:'pièce',emoji:'🍵'},
+    {id:4,name:'Espresso',cat:'Boissons chaudes',price:10,unit:'pièce',emoji:'☕'},
+    {id:5,name:'Eau',cat:'Boissons froides',price:6,unit:'pièce',emoji:'💧'},
+    {id:6,name:'Coca-Cola',cat:'Boissons froides',price:10,unit:'pièce',emoji:'🥤'},
+    {id:7,name:'Jus d’orange',cat:'Boissons froides',price:18,unit:'pièce',emoji:'🍊'},
+    {id:8,name:'Croissant',cat:'Pâtisserie',price:10,unit:'pièce',emoji:'🥐'},
+    {id:9,name:'Pain au chocolat',cat:'Pâtisserie',price:12,unit:'pièce',emoji:'🥐'},
+    {id:10,name:'Carnet de Crédit',cat:'Crédit',price:100,unit:'pièce',emoji:'📋'}
+  ],
+  customers:[
+    {id:1, name:'Aymane', phone:'0600000000', debt:0}
+  ],
+  sales:[],
+  weeklyBackups:[],
+  nextTicket:1,
+  totalUsageMinutes:0,
+  lastDailyExportDate:'',
+  lastWeeklyExportSunday:''
+};
+
+let db=load();
+
+function updateUIWithCafeName() {
+  const currentName = (db.settings && db.settings.name) ? db.settings.name : 'Mon Café';
+  
+  const docTitle = document.getElementById('appDocumentTitle');
+  if(docTitle) docTitle.textContent = currentName + ' — Gestion';
+
+  const sidebarLogo = document.getElementById('sidebarLogoDisplay');
+  if(sidebarLogo) {
+    let parts = currentName.trim().split(' ');
+    if(parts.length > 1) {
+      let last = parts.pop();
+      sidebarLogo.innerHTML = esc(parts.join(' ')) + ' <span>' + esc(last) + '</span>';
+    } else {
+      sidebarLogo.innerHTML = esc(currentName);
+    }
+  }
+
+  document.querySelectorAll('.cafe-name-display').forEach(el => {
+    el.textContent = currentName;
+  });
+
+  const setNameInput = document.getElementById('setName');
+  if(setNameInput && setNameInput.value !== currentName) {
+    setNameInput.value = currentName;
+  }
+}
+
+let currentOrderIndex = 1;
+let orders = loadPendingOrders();
+let activeOrderId = orders[0].id;
+
+function loadPendingOrders() {
+  try {
+    let saved = JSON.parse(localStorage.getItem(PENDING_ORDERS_KEY));
+    if (Array.isArray(saved) && saved.length > 0) {
+      return saved;
+    }
+  } catch (e) {
+    console.warn("Échec de lecture des tickets en cours depuis le cache :", e);
+  }
+  return [
+    { id: 1, name: 'Commande 1', cart: [], payment: 'Espèces', discount: 0, customerId: null }
+  ];
+}
+
+function savePendingOrders() {
+  try {
+    localStorage.setItem(PENDING_ORDERS_KEY, JSON.stringify(orders));
+  } catch (e) {
+    console.warn("Échec de la sauvegarde en cache des tickets en cours :", e);
+  }
+}
+
+function getNextOrderName() {
+  currentOrderIndex++;
+  if (currentOrderIndex > 70) {
+    currentOrderIndex = 1;
+  }
+  return `Commande ${currentOrderIndex}`;
+}
+
+function getActiveOrder() {
+  return orders.find(o => o.id === activeOrderId) || orders[0];
+}
+
+if(!db.settings)db.settings=structuredClone(defaults.settings);
+if(!db.settings.successMessage)db.settings.successMessage='Vente enregistrée avec succès !';
+if(db.settings.printEnabled === undefined) db.settings.printEnabled = true;
+if(db.settings.autoPrint === undefined) db.settings.autoPrint = false;
+if(db.settings.autoDownloadAuthorized === undefined) db.settings.autoDownloadAuthorized = localStorage.getItem('cafeAutoDownloadAuthorized') === '1';
+if(db.totalUsageMinutes === undefined) db.totalUsageMinutes = 0;
+if(!db.settings.securityCode) db.settings.securityCode = encodeBase64("Bogard00");
+
+if(!Array.isArray(db.products))db.products=[];
+if(!Array.isArray(db.customers))db.customers=structuredClone(defaults.customers);
+if(!Array.isArray(db.sales))db.sales=[];
+if(!Array.isArray(db.weeklyBackups))db.weeklyBackups=[];
+
+function load(){
+  try{
+    let x=JSON.parse(localStorage.getItem(KEY));
+    return x?Object.assign(defaults,x):structuredClone(defaults);
+  }catch(e){
+    return structuredClone(defaults);
+  }
+}
+
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(db));
+  updateUIWithCafeName();
+}
+function money(n){return Number(n||0).toFixed(2).replace('.',',')+' '+(db.settings?.currency||'DH')}
+function today(){return new Date().toISOString().slice(0,10)}
+function toast(s){let t=document.getElementById('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+
+function formatUsageTime(totalMinutes) {
+  let h = Math.floor(totalMinutes / 60);
+  let m = totalMinutes % 60;
+  if (h > 0) {
+    return `${h} h ${m < 10 ? '0' + m : m} min`;
+  }
+  return `${m} min`;
+}
+
+function updateUsageTimeDisplay() {
+  let el = document.getElementById('setTotalUsageTime');
+  if (el) {
+    el.value = formatUsageTime(db.totalUsageMinutes || 0);
+  }
+}
+
+setInterval(() => {
+  db.totalUsageMinutes = (db.totalUsageMinutes || 0) + 1;
+  save();
+  updateUsageTimeDisplay();
+}, 60000);
+
+function checkAndTriggerDailyExcel() {
+  const currentToday = today();
+  const currentDateObj = new Date();
+  
+  if (!db.lastDailyExportDate) {
+    db.lastDailyExportDate = currentToday;
+    save();
+  } else if (db.lastDailyExportDate < currentToday) {
+    let prevDate = new Date();
+    prevDate.setDate(prevDate.getDate() - 1);
+    let targetDateStr = prevDate.toISOString().slice(0, 10);
+    
+    if (targetDateStr < db.lastDailyExportDate) {
+      targetDateStr = db.lastDailyExportDate;
+    }
+
+    exportExcelDaily(targetDateStr);
+    db.lastDailyExportDate = currentToday;
+    save();
+    toast(`📊 Bilan quotidien Excel du ${targetDateStr} généré et téléchargé !`);
+  }
+
+  if (currentDateObj.getDay() === 0) {
+    if (db.lastWeeklyExportSunday !== currentToday) {
+      let { mondayStr, sundayStr } = getWeekRange(currentDateObj);
+      exportExcelWeekly(mondayStr, sundayStr);
+      db.lastWeeklyExportSunday = currentToday;
+      save();
+      toast(`📊 Bilan hebdomadaire du dimanche (${mondayStr} au ${sundayStr}) généré automatiquement !`);
+    }
+  }
+}
+
+setTimeout(checkAndTriggerDailyExcel, 2000);
+setInterval(checkAndTriggerDailyExcel, 60000);
+
+function getWeekRange(dateObj = new Date()) {
+  let d = new Date(dateObj);
+  let day = d.getDay();
+  let diffToMonday = (day === 0 ? -6 : 1 - day);
+  
+  let monday = new Date(d);
+  monday.setDate(d.getDate() + diffToMonday);
+  
+  let sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  
+  return {
+    mondayStr: monday.toISOString().slice(0, 10),
+    sundayStr: sunday.toISOString().slice(0, 10)
+  };
+}
+
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function openModal(title,bodyHtml){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=bodyHtml;
+  document.getElementById('modal').classList.add('open');
+}
+
+function page(p){
+  if(p === 'parametres'){
+    checkSecurityCode(() => executePageSwitch('parametres'));
+    return;
+  }
+  executePageSwitch(p);
+}
+
+function executePageSwitch(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  const target=document.getElementById(p);
+  if(!target)return;
+  target.classList.add('active');
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===p));
+  document.getElementById('pageTitle').textContent={
+    dashboard:'Tableau de bord',
+    caisse:'Caisse',
+    clients:'Clients & Crédits',
+    articles:'Articles',
+    tickets:'Tickets',
+    sauvegardes:'Sauvegardes & Bilans',
+    ambiance:'Ambiance Café',
+    parametres:'Paramètres',
+    personnalisation:'Personnalisation'
+  }[p]||(db.settings?.name || 'Café');
+  if(p==='dashboard')renderDashboard();
+  if(p==='caisse')renderPOS();
+  if(p==='clients')renderCustomers();
+  if(p==='articles')renderArticles();
+  if(p==='tickets')renderTickets();
+  if(p==='sauvegardes')renderSauvegardes();
+  if(p==='ambiance')renderAmbiance();
+  if(p==='parametres')renderSettings();
+  if(p==='personnalisation')renderPersonalisation();
+}
+
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{ if(b.dataset.page==='personnalisation') openPersonalisation(); else page(b.dataset.page); });
+
+function renderDashboard(){
+  const td=today(), sales=db.sales.filter(s=>s.date.slice(0,10)===td);
+  const totalCredits = db.customers.reduce((a,c)=>a+(c.debt||0),0);
+  document.getElementById('kpiCA').textContent=money(sales.reduce((a,s)=>a+s.total,0));
+  document.getElementById('kpiTickets').textContent=sales.length;
+  document.getElementById('kpiCredits').textContent=money(totalCredits);
+  document.getElementById('kpiCustomers').textContent=db.customers.length;
+  document.getElementById('dashTickets').innerHTML=sales.slice(-7).reverse().map(s=>`<div class="total-line"><span><b>${s.id}</b> · ${s.employee} ${s.customerName?'('+esc(s.customerName)+')':''}</span><strong>${money(s.total)}</strong></div>`).join('')||'<div class="empty">Aucun ticket aujourd’hui.</div>';
+}
+
+function categories(){return [...new Set(db.products.map(p=>p.cat))].sort()}
+
+function renderOrderTabs(){
+  const container = document.getElementById('orderTabsBar');
+  if(!container) return;
+
+  let html = orders.map(o => {
+    let itemCount = o.cart.reduce((a,r)=>a+r.qty, 0);
+    return `
+      <div class="order-tab ${o.id === activeOrderId ? 'active' : ''}" onclick="switchOrder(${o.id})">
+        <span>📋 ${esc(o.name)} ${itemCount > 0 ? `(${itemCount})` : ''}</span>
+        <button class="rename-tab-btn" title="Renommer la commande" onclick="event.stopPropagation(); renameOrderTab(${o.id});">✏️</button>
+      </div>
+    `;
+  }).join('');
+
+  html += `<button class="btn-add-order" onclick="addNewOrder()">+ Ajouter une commande</button>`;
+  container.innerHTML = html;
+}
+
+function renameOrderTab(orderId) {
+  let targetOrder = orders.find(o => o.id === orderId);
+  if(!targetOrder) return;
+
+  openModal('✏️ Renommer la commande', `
+    <div style="padding: 10px 0;">
+      <div class="field full">
+        <label>Nom de l'onglet / de la table</label>
+        <input type="text" id="renameTabInput" value="${esc(targetOrder.name)}" placeholder="Ex: Table 4, Terrasse, Aymane..." style="width:100%; font-size:15px; padding:12px;" autofocus>
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+        <button class="btn" style="flex:1;" onclick="closeModal()">Annuler</button>
+        <button class="btn primary" style="flex:1;" onclick="confirmRenameOrderTab(${orderId})">Valider</button>
+      </div>
+    </div>
+  `);
+
+  setTimeout(() => {
+    let input = document.getElementById('renameTabInput');
+    if(input) {
+      input.focus();
+      input.select();
+      input.onkeydown = function(e) {
+        if(e.key === 'Enter') confirmRenameOrderTab(orderId);
+      };
+    }
+  }, 100);
+}
+
+function confirmRenameOrderTab(orderId) {
+  let targetOrder = orders.find(o => o.id === orderId);
+  let input = document.getElementById('renameTabInput');
+  if(targetOrder && input) {
+    let newName = input.value.trim();
+    if(newName !== '') {
+      targetOrder.name = newName;
+      savePendingOrders();
+      renderOrderTabs();
+      closeModal();
+      toast('Commande renommée avec succès !');
+    } else {
+      toast('Veuillez saisir un nom valide.');
+    }
+  }
+}
+
+function addNewOrder(){
+  let newId = Date.now();
+  let name = getNextOrderName();
+  orders.push({ id: newId, name, cart: [], payment: 'Espèces', discount: 0, customerId: null });
+  activeOrderId = newId;
+  savePendingOrders();
+  renderPOS();
+  toast('Nouvelle commande ajoutée : ' + name);
+}
+
+function switchOrder(id){
+  activeOrderId = id;
+  renderPOS();
+}
+
+function renderPOS(){
+  renderOrderTabs();
+
+  let cf=document.getElementById('catFilter'), old=cf.value;
+  cf.innerHTML='<option value="">Toutes les catégories</option>'+categories().map(c=>`<option>${esc(c)}</option>`).join('');
+  cf.value=old;
+
+  let activeCmd = getActiveOrder();
+
+  let sel=document.getElementById('creditCustomerSelect');
+  sel.innerHTML = db.customers.map(c=>`<option value="${c.id}" ${activeCmd.customerId === c.id ? 'selected' : ''}>${esc(c.name)} (Dette Restante: ${money(c.debt)})</option>`).join('');
+
+  document.getElementById('discount').value = activeCmd.discount || 0;
+
+  document.querySelectorAll('.quick-pay button').forEach(b => {
+    b.classList.remove('selected');
+    if (b.textContent.includes(activeCmd.payment)) {
+      b.classList.add('selected');
+    }
+  });
+
+  const box = document.getElementById('creditCustomerBox');
+  if(activeCmd.payment === 'Crédit'){
+    box.style.display = 'block';
+  } else {
+    box.style.display = 'none';
+  }
+
+  renderProducts();
+  renderCart();
+}
+
+function renderProducts(){
+  let q=(document.getElementById('productSearch').value||'').toLowerCase(), cat=document.getElementById('catFilter').value;
+  let ps=db.products.filter(p=>(!q||p.name.toLowerCase().includes(q))&&(!cat||p.cat===cat));
+  document.getElementById('products').innerHTML=ps.map(p=>`<button class="product" onclick="addToCart(${p.id})"><span class="emoji">${p.emoji||'☕'}</span><strong>${esc(p.name)}</strong><small>${money(p.price)} · ${esc(p.cat)}</small></button>`).join('')||'<div class="empty">Aucun produit.</div>';
+}
+
+function addToCart(id){
+  let activeCmd = getActiveOrder();
+  let p=db.products.find(x=>x.id===id), row=activeCmd.cart.find(x=>x.id===id);
+  if(!p)return toast('Produit indisponible');
+  row?row.qty++:activeCmd.cart.push({id,qty:1});
+  savePendingOrders();
+  renderOrderTabs();
+  renderCart();
+}
+
+function changeQty(id,d){
+  let activeCmd = getActiveOrder();
+  let r=activeCmd.cart.find(x=>x.id===id);if(!r)return;
+  r.qty+=d;
+  if(r.qty<=0)activeCmd.cart=activeCmd.cart.filter(x=>x.id!==id);
+  savePendingOrders();
+  renderOrderTabs();
+  renderCart();
+}
+
+function updateDiscount(val){
+  let activeCmd = getActiveOrder();
+  activeCmd.discount = Math.max(0, Number(val || 0));
+  savePendingOrders();
+  renderCart();
+}
+
+function updateCustomerSelect(val){
+  let activeCmd = getActiveOrder();
+  activeCmd.customerId = Number(val);
+  savePendingOrders();
+}
+
+function renderCart(){
+  let activeCmd = getActiveOrder();
+  let cart = activeCmd.cart;
+
+  let sub=cart.reduce((a,r)=>{
+    let p=db.products.find(x=>x.id===r.id);
+    return a+(p?p.price*r.qty:0);
+  },0);
+  let disc=activeCmd.discount || 0;
+  let total=Math.max(0,sub-disc);
+
+  document.getElementById('cartCount').textContent=cart.reduce((a,r)=>a+r.qty,0)+' article(s)';
+  document.getElementById('subtotal').textContent=money(sub);
+  document.getElementById('total').textContent=money(total);
+  document.getElementById('cartList').innerHTML=cart.map(r=>{
+    let p=db.products.find(x=>x.id===r.id);
+    return `<div class="cart-row"><div><b>${esc(p ? p.name : '')}</b><br><small>${money(p ? p.price : 0)}</small></div><div class="qty"><button onclick="changeQty(${r.id},-1)">−</button><b>${r.qty}</b><button onclick="changeQty(${r.id},1)">+</button></div><strong>${money((p ? p.price : 0)*r.qty)}</strong></div>`;
+  }).join('')||'<div class="empty">Touchez un produit pour commencer.</div>';
+}
+
+function setPayment(x,b){
+  let activeCmd = getActiveOrder();
+  activeCmd.payment=x;
+  savePendingOrders();
+  document.querySelectorAll('.quick-pay button').forEach(q=>q.classList.remove('selected'));
+  b.classList.add('selected');
+  
+  const box = document.getElementById('creditCustomerBox');
+  if(x === 'Crédit'){
+    box.style.display = 'block';
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function confirmClearCart(){
+  let activeCmd = getActiveOrder();
+  openModal('🗑️ Confirmation - Vider la caisse', `
+    <div style="text-align:center; padding:10px 0;">
+      <p style="margin-bottom:15px; font-size:15px; font-weight:600;">Voulez-vous vraiment vider la commande <b>"${esc(activeCmd.name)}"</b> et fermer cet onglet ?</p>
+      <p style="color:var(--muted); font-size:13px; margin-bottom:20px;">Cette action annulera tous les articles enregistrés dans cet onglet.</p>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button class="btn" style="flex:1;" onclick="closeModal()">Annuler</button>
+        <button class="btn danger" style="flex:1;" onclick="closeModal(); executeClearAndCloseOrder();">Confirmer &amp; Supprimer l'onglet</button>
+      </div>
+    </div>
+  `);
+}
+
+function executeClearAndCloseOrder(){
+  let activeCmd = getActiveOrder();
+  orders = orders.filter(o => o.id !== activeCmd.id);
+  
+  if (orders.length === 0) {
+    orders.push({ id: Date.now(), name: getNextOrderName(), cart: [], payment: 'Espèces', discount: 0, customerId: null });
+  }
+  activeOrderId = orders[0].id;
+
+  savePendingOrders();
+  renderPOS();
+  toast('Caisse vidée et onglet supprimé avec succès !');
+}
+
+function clearCart(){
+  confirmClearCart();
+}
+
+function finishSale(){
+  let activeCmd = getActiveOrder();
+  let cart = activeCmd.cart;
+
+  if(!cart.length)return toast('Le ticket de la commande active est vide');
+  let empName=db.settings.name || 'Café';
+  let sub=cart.reduce((a,r)=>{
+    let pr = db.products.find(p=>p.id===r.id);
+    return a + (pr ? pr.price * r.qty : 0);
+  },0);
+  let disc=activeCmd.discount || 0;
+  let total=Math.max(0,sub-disc);
+  
+  let customerId = null;
+  let customerName = '';
+
+  if(activeCmd.payment === 'Crédit'){
+    if(!db.customers.length){
+      return toast('Veuillez d’abord ajouter un client dans l’onglet Clients.');
+    }
+    const sel = document.getElementById('creditCustomerSelect');
+    customerId = Number(sel.value);
+    const cust = db.customers.find(c => c.id === customerId);
+    if(cust){
+      customerName = cust.name;
+      cust.debt = (cust.debt || 0) + total;
+    }
+  }
+
+  let id='T'+String(db.nextTicket++).padStart(5,'0');
+  let sale={
+    id,
+    date:new Date().toISOString(),
+    employee:empName,
+    payment:activeCmd.payment,
+    customerId,
+    customerName,
+    items:cart.map(r=>{
+      let p=db.products.find(x=>x.id===r.id);
+      return {id:p ? p.id : r.id, name:p ? p.name : 'Inconnu', price:p ? p.price : 0, qty:r.qty};
+    }),
+    subtotal:sub,
+    discount:disc,
+    total
+  };
+  db.sales.push(sale);
+  save();
+
+  const isPrintEnabled = db.settings.printEnabled !== false;
+  const isAutoPrint = db.settings.autoPrint === true;
+
+  if (isPrintEnabled) {
+    if (isAutoPrint) {
+      printReceipt(sale);
+    } else {
+      openModal('🖨️ Impression', `
+        <div style="text-align:center; padding:10px 0;">
+          <p style="margin-bottom:20px; font-weight:600;">Vente enregistrée avec succès ! Voulez-vous imprimer le ticket ?</p>
+          <div style="display:flex; gap:10px; justify-content:center;">
+            <button class="btn" style="flex:1;" onclick="closeModal(); executeFinishSaleUI();">Non</button>
+            <button class="btn primary" style="flex:1;" onclick="closeModal(); printReceipt(db.sales[db.sales.length-1]); executeFinishSaleUI();">Oui, imprimer</button>
+          </div>
+        </div>
+      `);
+      return;
+    }
+  }
+  
+  executeFinishSaleUI();
+}
+
+function executeFinishSaleUI() {
+  let activeCmd = getActiveOrder();
+  activeCmd.cart = [];
+  activeCmd.discount = 0;
+  savePendingOrders();
+  renderPOS();
+  toast(db.settings.successMessage || 'Vente enregistrée avec succès !');
+}
+
+// Initialisation au chargement de la page
+document.addEventListener('DOMContentLoaded', () => {
+  updateUIWithCafeName();
+  if(!localStorage.getItem('cafeConfigured')){
+    showFirstLoginSetup();
+  } else {
+    renderDashboard();
+  }
+});
+
+</script>
+</body>
+</html>
